@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 [ "$vim" ] || vim=vim
 [ $viminfo ] || viminfo=~/.viminfo
@@ -41,7 +41,7 @@ if [ "$edit" ]; then
     resp=${files[$edit]}
 elif [ "$i" = 1 -o "$list" = "" ]; then
     resp=${files[1]}
-elif [ "$i" ]; then 
+elif [ "$i" ]; then
     while [ $i -gt 0 ]; do
          echo -e "$i\t${files[$i]}"
          i=$((i-1))
