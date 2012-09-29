@@ -1,54 +1,94 @@
 #!/bin/sh
 
-[ "$vim" ] || vim=vim
-[ $viminfo ] || viminfo=~/.viminfo
-
-usage="$(basename $0) [-a] [-l] [-[0-9]] [--debug] [--help] [regexes]"
-
-[ $1 ] || list=1
-
-fnd=()
-for x; do case $x in
-    -a) deleted=1;;
-    -l) list=1;;
-    -[1-9]) edit=${x:1}; shift;;
-    --help) echo $usage; exit;;
-    --debug) vim=echo;;
-    --) shift; fnd+=("$@"); break;;
-    *) fnd+=("$x");;
-esac; shift; done
-set -- "${fnd[@]}"
-
-[ -f "$1" ] && {
-    $vim "$1"
-    exit
+usage() {
+    printf 'usage: %s %s %s\n' "${0##*/}" "[-a] [-l|--list] [-[0-9]] [-h|--help]" "<regexe[s]>" >&2
+	exit 1
 }
 
-while IFS=" " read line; do
-    [ "${line:0:1}" = ">" ] || continue
-    fl=${line:2}
-    [ -f "${fl/\~/$HOME/}" -o "$deleted" ] || continue
-    match=1
-    for x; do
-        [[ "$fl" =~ $x ]] || match=
-    done
-    [ "$match" ] || continue
-    i=$((i+1))
-    files[$i]="$fl"
-done < "$viminfo"
+while [ $# -ne 0 ]
+do
+    case "$1" in
+        -a|--all)
+            del=1
+            ;;
+		-d|--debug)
+			dbg=1
+			;;
+        -l|--list)
+            list=1
+            ;;
+        -h|--help)
+            usage
+            ;;
+        --)
+            break
+            ;;
+        *)
+			break
+            ;;
+    esac
+    shift
+done
 
-if [ "$edit" ]; then
-    resp=${files[$edit]}
-elif [ "$i" = 1 -o "$list" = "" ]; then
-    resp=${files[1]}
-elif [ "$i" ]; then
-    while [ $i -gt 0 ]; do
-         echo -e "$i\t${files[$i]}"
-         i=$((i-1))
-    done
-    read -p '> ' CHOICE
-    resp=${files[$CHOICE]}
+info="${info:-$HOME/.viminfo}"
+
+case $# in
+	0)
+		list=1
+		;;
+	1)
+		if [ -f "$1" ]
+		then
+			vim "$1"
+			exit
+		fi
+esac
+
+# if no arguments were given
+# then default to list files
+if [ $# -eq 0 ]
+then list=1
+# if there's only one argument
+# and that argument is a file
+# then edit that file
+elif [ $# -eq 1 -a -f "$1" ]
+then
+	vim "$1"
+    exit
 fi
 
-[ "$resp" ] || exit
-$vim "${resp/\~/$HOME}"
+# construct regex
+rgx="$(printf '%s\|' "$@")"
+rgx="${rgx%??}"
+
+# TODO test with files with spaces
+# generate list of matched files
+set -- $(grep "^>" "$info" | grep -i "$rgx" | while read -r _ file
+do
+	if [ -z "${file%%~*}" ]
+	then file="$HOME/${file#?}"
+	fi
+	[ -f "$file" -o ${del:-0} -ne 0 ] && printf '%s ' "$file"
+done)
+
+if [ $# -eq 0 ]
+then
+	echo 'no files found' >&2
+	exit 1
+fi
+
+if [ ${list:-0} -eq 0 -o $# -eq 1 ]
+then file="$1"
+else
+	while [ ${i:=1} -le $# ]
+	do
+		printf "%3d. %s\n" "$i" "${!i}"
+		: $((i+=1))
+	done
+	# TODO sanitize choice
+	read -p 'choose file: ' file
+	file="${!file:-$1}"
+fi
+
+[ ${dbg:-0} -ne 0 ] && echo "vim $file" || vim "$file"
+
