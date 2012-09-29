@@ -4,10 +4,10 @@
 v \- z for vim
 
 .SH SYNOPSIS
-v [\-a] [\-l] [\-[0\-9]] [\-\-debug] [\-\-help] [regex1 regex2 ... regexn]
+v [\-a|\-\-all] [\-l|\-\-list] [\-\-debug] [\-\-help] [regex1 regex2 ... regexn]
 
 .SH AVAILABILITY
-bash, vim
+vim
 
 .SH DESCRIPTION
 \fBv\fR uses viminfo's list of recently edited files to open one quickly no
@@ -17,27 +17,20 @@ By default, it will open the most recently edited file matching all of the
 provided regular expressions.
 
 .SH OPTIONS
-\fB\-a\fR           don't skip deleted files
+\fB\-a \-\-all\fR     don't skip deleted files
 .br
-\fB\-l\fR           when multiple matches, show a list
+\fB\-l \-\-list\fR    when multiple matches, show a list
 .br
-\fB\-[0\-9]\fR       edit nth most recent file
+\fB\-d \-\-debug\fR   when multiple matches, show a list
 .br
-\fB\--debug\fR      dry run
-.br
-\fB\--help\fR       show a brief help message
+\fB\-h \-\-help\fR    show a brief help message
 
 .SH EXAMPLES
 \fBv\fR            list and choose from all files
 .br
-\fBv -1\fR         reopen most recently edited file
+\fBv foo bar\fR    edit first file matching foo or/and bar
 .br
-\fBv foo bar\fR    edit first file matching foo and bar
-.br
-\fBv -l foo bar\fR list and choose files matching foo and bar
-
-.SH NOTES
-Shell variables, such as $, must be escaped if used in regular expressions.
+\fBv -l foo bar\fR list and choose files matching foo or/and bar
 
 \fBBehavior\fR
 .br
@@ -46,10 +39,10 @@ terms, even if there are multiple matches.
 
 You may find it useful to alias vl='v -l'. When there are multiple matches,
 this will prompt for a choice, rather than editing the first match. The author
-is still not sure which behavior should be the default, and has chosen one 
+is still not sure which behavior should be the default, and has chosen one
 provisionally.
 
 .SH SEE ALSO
 vim(1), regex(7)
 .P
-Please file bugs at https://github.com/rupa/v/
+Please file bugs at https://github.com/c00kiemon5ter/v/
