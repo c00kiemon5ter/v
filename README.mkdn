@@ -1,0 +1,9 @@
+This is a fork of [v][v] by [rupa][r].
+
+This `v` is POSIX `sh` compatible and has a somewhat different behavior (ie there is no _number argument_)
+
+Read the man page and compare.
+
+  [v]: https://github.com/rupa/v
+  [r]: https://github.com/rupa
+
